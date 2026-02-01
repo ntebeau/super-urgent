@@ -1,0 +1,513 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>superurgent</title>
+
+  <style>
+    .stars{
+  font-size: 2.6rem;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 10px;
+}
+
+.stars span{
+  color: #ddd;
+  transition: color 0.2s, transform 0.15s;
+  padding: 4px;
+}
+
+.stars span:hover{
+  transform: scale(1.2);
+}
+
+.stars span.active{
+  color: #ff6b81;
+}
+
+    .pic-row{
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* so it looks good on phones too */
+  margin: 14px 0 10px;
+}
+
+.pic-row img{
+  width: 170px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ffd1dc, #fff0f5);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      text-align:center;
+      padding: 18px;
+    }
+    .card{
+      width: min(600px, 92vw);
+      background:#fff;
+      border-radius:20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      padding:28px 22px;
+      animation: fadeIn .35s ease-in-out;
+    }
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    h1{
+      color:#d6336c;
+      font-size: 2rem;
+      margin: 8px 0 12px;
+    }
+    p{
+      color:#555;
+      font-size: 1.08rem;
+      margin: 10px 0 16px;
+    }
+
+    button{
+      padding: 14px 22px;
+      font-size: 1.05rem;
+      margin: 10px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      background:#ff6b81;
+      color:#fff;
+      transition: transform .15s, background .15s;
+    }
+    button:hover{ background:#ff4757; transform: scale(1.03); }
+    button.secondary{ background:#adb5bd; }
+    button.secondary:hover{ background:#868e96; }
+
+    input{
+      width: 240px;
+      padding: 12px 14px;
+      font-size: 1.1rem;
+      text-align: center;
+      border-radius: 12px;
+      border: 2px solid #ffd1dc;
+      outline: none;
+    }
+    input:focus{
+      border-color:#ff6b81;
+      box-shadow: 0 0 0 4px rgba(255,107,129,.18);
+    }
+
+    .hint{
+      font-size: .95rem;
+      color:#777;
+      margin-top: 10px;
+    }
+    .error{
+      color:#c92a2a;
+      font-weight: 700;
+      margin-top: 12px;
+      min-height: 1.2em;
+    }
+
+    .valentine-img{
+      width: min(300px, 75%);
+      border-radius: 16px;
+      margin: 10px auto 6px;
+      display: none; /* shown only if an image is provided */
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    .no-msg{
+      margin-top: 12px;
+      font-weight: 800;
+      color:#d6336c;
+      min-height: 1.2em;
+    }
+
+    @keyframes fadeIn{
+      from{ opacity:0; transform: scale(.985); }
+      to{ opacity:1; transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <!-- 1) NAME GATE -->
+    <div id="screen-name" class="screen active">
+        <h1>Is your name <span id="herNameText">HER_NAME_HERE</span>?</h1>
+        <p>Don't lie.</p>
+        <button id="btnYesName">Yes!</button>
+        <button id="btnNoName" class="secondary">No 🤨🤨🤨</button>
+      </div>
+      
+
+    <!-- If NO name -->
+    <div id="screen-leave" class="screen">
+      <h1>fuck off</h1>
+      <p>This page is for <span id="herNameText2">HER_NAME_HERE</span> only</p>
+      <p>Please leave❤️❤️❤️</p>
+      <button class="secondary" id="btnBackToStart">Restart</button>
+    </div>
+
+    <!-- 2) CODE -->
+    <div id="screen-code" class="screen">
+      <h1>pop quiz to prove it</h1>
+      <p>enter a 4-digit code:</p>
+
+      <input
+        id="codeInput"
+        type="password"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        maxlength="4"
+        placeholder="••••"
+        autocomplete="off"
+      />
+      <div class="hint">(hint is our anniversary)</div>
+
+      <div>
+        <button id="btnSubmitCode">Submit!</button>
+        <button class="secondary" id="btnCodeBack">I lied i'm not Sarah</button>
+      </div>
+
+      <div id="codeError" class="error"></div>
+    </div>
+
+    <!-- 3) "O hey glad its you!!" -->
+    <div id="screen-hey" class="screen">
+      <h1>O hey glad its you!!</h1>
+      <button id="btnContinue1">Continue ➜</button>
+    </div>
+
+    <!-- 4) "hella important question" -->
+    <div id="screen-important" class="screen">
+      <h1>i have a hella important question</h1>
+      <button id="btnDoShare">do share</button>
+    </div>
+
+    <!-- 5) VALENTINE ASK -->
+    <div id="screen-ask" class="screen">
+      <h1>will you be my valentine?</h1>
+
+      <!-- Optional image: put a file named "valentine.jpg" in same folder as index.html
+           or change IMG_SRC in the script >
+      <img id="valentineImg" class="valentine-img" alt="us 💖" -->
+
+      <div>
+        <button id="btnYes">yes 🔥🔥</button>
+        <button id="btnNo" class="secondary">no(i stg🔫)</button>
+      </div>
+
+      <div id="noMsg" class="no-msg"></div>
+    </div>
+
+    <!-- 6) YES PATH PLACEHOLDER -->
+    <div id="screen-yes" class="screen">
+        <h1>Yay!!</h1>
+        <p>never a doubt ❤️</p>
+        <button id="btnKeepGoing">keep going i am having sm fun</button>
+    </div>
+    <!-- 7) PICS PAGE -->
+<div id="screen-pics" class="screen">
+    <h1>heres some of my fav pics of us</h1>
+  
+    <div class="pic-row">
+      <img src="vdaypic1.jpg" alt="pic 1" />
+      <img src="vdaypic2.jpg" alt="pic 2" />
+      <img src="vdaypic3.jpg" alt="pic 3" />
+    </div>
+  
+    <p>excited to get more abroad!!</p>
+    <button id="btnMorePlz">more plz</button>
+  </div>
+  
+  <!-- 8) SURPRISE INTRO -->
+  <div id="screen-surprise" class="screen">
+    <h1>since u said yes i have a small surprise for u</h1>
+    <button id="btnWhatIsIt">well what is it?</button>
+  </div>
+  
+  <!-- 9) ROCK PAPER SCISSORS -->
+  <div id="screen-rps" class="screen">
+    <h1>first beat me in rock paper scissors</h1>
+    <p>i pick scissors</p>
+  
+    <div>
+      <button id="btnPickScissors">scissors</button>
+      <button id="btnPickPaper" class="secondary">paper</button>
+      <button id="btnPickRock">rock</button>
+    </div>
+  
+    <div id="rpsMsg" class="no-msg"></div>
+  </div>
+  
+  <!-- 10) NEXT PAGE PLACEHOLDER AFTER WIN -->
+  <div id="screen-after-rps" class="screen">
+    <h1>woah nice job</h1>
+    <button id="btnSurprise">so what is surprise</button>
+  </div>
+<!-- 11) SURPRISE REVEAL -->
+<div id="screen-delivery" class="screen">
+  <h1>🔥 you have a delivery inbound today or tmr 🔥</h1>
+  <p>(if i logistically do this right)</p>
+  <button id="btnSoExciting">so exciting!!</button>
+</div>
+
+<!-- 12) CONCLUSION / RATING -->
+<div id="screen-conclusion" class="screen">
+  <h1>conclusion of website:(</h1>
+  <p>hope you enjoyed!!</p>
+  <p>I miss you a ton and am v excited to see you in Milan &lt;3</p>
+  <p>please leave a rating if you enjoyed!</p>
+
+  <div>
+    <button id="btnGreatTime">I had a fantastic time</button>
+    <button id="btnBadTime" class="secondary">I did not have a great time</button>
+  </div>
+
+  <div id="ratingMsg" class="no-msg"></div>
+</div>
+
+<!-- 13) GREAT RATING PAGE -->
+<div id="screen-great" class="screen">
+  <h1>rate ur experience ⭐</h1>
+  <p>1 = idk, 5 = life changing</p>
+
+  <div class="stars">
+    <span data-value="1">★</span>
+    <span data-value="2">★</span>
+    <span data-value="3">★</span>
+    <span data-value="4">★</span>
+    <span data-value="5">★</span>
+  </div>
+
+  <div id="starMsg" class="no-msg"></div>
+</div>
+
+  
+  
+
+  </div>
+
+  <script>
+    // ====== CUSTOMIZE THESE ======
+    const HER_NAME = "Sarah Livchits";   // change to her name
+    const SECRET_CODE = "1206";         // change to your 4-digit anniversary code
+    // YES page -> pics page
+document.getElementById("btnKeepGoing").addEventListener("click", () => {
+  goTo("screen-pics");
+});
+
+// pics page -> surprise page
+document.getElementById("btnMorePlz").addEventListener("click", () => {
+  goTo("screen-surprise");
+});
+
+// surprise page -> rps page
+document.getElementById("btnWhatIsIt").addEventListener("click", () => {
+  goTo("screen-rps");
+  document.getElementById("rpsMsg").textContent = "";
+});
+
+// rps choices
+const rpsMsg = document.getElementById("rpsMsg");
+
+document.getElementById("btnPickScissors").addEventListener("click", () => {
+  rpsMsg.textContent = "we tied, how fun";
+});
+
+document.getElementById("btnPickPaper").addEventListener("click", () => {
+  rpsMsg.textContent = "are we deadass";
+});
+// after RPS -> surprise button
+document.getElementById("btnSurprise").addEventListener("click", () => {
+  goTo("screen-delivery");
+});
+
+// delivery -> conclusion
+document.getElementById("btnSoExciting").addEventListener("click", () => {
+  goTo("screen-conclusion");
+});
+
+// rating buttons
+document.getElementById("btnGreatTime").addEventListener("click", () => {
+  goTo("screen-great");
+});
+
+document.getElementById("btnBadTime").addEventListener("click", () => {
+  document.getElementById("ratingMsg").textContent = "don't lie to urself u loved it";
+});
+
+document.getElementById("btnPickRock").addEventListener("click", () => {
+  rpsMsg.textContent = "";
+  goTo("screen-after-rps");
+});
+
+    // Optional image:
+    // Put your photo in the same folder as index.html and name it "valentine.jpg"
+    // OR change this to "photo.png" etc.
+    const IMG_SRC = "valentine.jpg";
+    // =============================
+
+    // Set name text in the UI
+    document.getElementById("herNameText").textContent = HER_NAME;
+    document.getElementById("herNameText2").textContent = HER_NAME;
+
+    // Screen switcher
+    function goTo(id){
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    // 1) Name gate
+    document.getElementById("btnYesName").addEventListener("click", () => {
+      goTo("screen-code");
+      setTimeout(() => document.getElementById("codeInput").focus(), 50);
+    });
+
+    document.getElementById("btnNoName").addEventListener("click", () => {
+      goTo("screen-leave");
+    });
+
+    document.getElementById("btnBackToStart").addEventListener("click", () => {
+      goTo("screen-name");
+    });
+
+    // 2) Code behavior
+    const codeInput = document.getElementById("codeInput");
+    const codeError = document.getElementById("codeError");
+    let codeFailCount = 0;
+
+    function checkCode(){
+  const val = codeInput.value.trim();
+
+  if (val.length !== 4) {
+    codeError.textContent = "you need to enter four digits❤️";
+    return;
+  }
+
+  if (val === SECRET_CODE) {
+    codeFailCount = 0; // reset on success
+    codeError.textContent = "";
+    codeInput.value = "";
+    goTo("screen-hey");
+  } else {
+    codeFailCount++;
+
+    if (codeFailCount === 1) {
+      codeError.textContent = "bro lock in whats our anniversary";
+    } else if (codeFailCount === 2) {
+      codeError.textContent = "did u lie are u not sarah";
+    } else {
+      codeError.textContent = "NO";
+    }
+
+    codeInput.value = "";
+    codeInput.focus();
+  }
+}
+
+
+    document.getElementById("btnSubmitCode").addEventListener("click", checkCode);
+    document.getElementById("btnCodeBack").addEventListener("click", () => {
+      codeError.textContent = "";
+      codeInput.value = "";
+      goTo("screen-name");
+    });
+
+    codeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") checkCode();
+    });
+
+    codeInput.addEventListener("input", () => {
+      codeInput.value = codeInput.value.replace(/\D/g, "").slice(0, 4);
+    });
+
+    // 3) Continue
+    document.getElementById("btnContinue1").addEventListener("click", () => {
+      goTo("screen-important");
+    });
+
+    // 4) Do share
+    document.getElementById("btnDoShare").addEventListener("click", () => {
+      goTo("screen-ask");
+      setupImageIfAvailable();
+    });
+
+    // 5) Valentine ask behavior
+    let noClickCount = 0;
+    const noMsg = document.getElementById("noMsg");
+
+    document.getElementById("btnNo").addEventListener("click", () => {
+      noClickCount++;
+
+      if (noClickCount === 1) {
+        noMsg.textContent = "i think your mouse slipped";
+      } else if (noClickCount === 2) {
+        noMsg.textContent = "wow ur aim sucks";
+      } else if (noClickCount === 3) {
+        noMsg.textContent = "?????";
+      } else {
+        noMsg.textContent = "NO";
+      }
+    });
+
+    document.getElementById("btnYes").addEventListener("click", () => {
+      goTo("screen-yes");
+    });
+
+    // Optional: show image only if it actually loads
+    function setupImageIfAvailable(){
+      const img = document.getElementById("valentineImg");
+      img.src = IMG_SRC;
+
+      img.onload = () => {
+        img.style.display = "block";
+      };
+      img.onerror = () => {
+        img.style.display = "none";
+      };
+    }
+    // ⭐ STAR RATING LOGIC
+const stars = document.querySelectorAll(".stars span");
+const starMsg = document.getElementById("starMsg");
+
+stars.forEach(star => {
+  star.addEventListener("click", () => {
+    const rating = Number(star.dataset.value);
+
+    // highlight stars
+    stars.forEach(s => {
+      s.classList.toggle("active", Number(s.dataset.value) <= rating);
+    });
+
+    // messages
+    if (rating === 1) {
+      starMsg.textContent = "sorry what's up???";
+    } else if (rating === 2) {
+      starMsg.textContent = "be serious rn";
+    } else if (rating === 3) {
+      starMsg.textContent = "honestly this is worse than 1🤨";
+    } else if (rating === 4) {
+      starMsg.textContent = "ig ill take it";
+    } else {
+      starMsg.textContent = "wow your so kind!!!";
+    }
+  });
+});
+
+  </script>
+</body>
+</html>
